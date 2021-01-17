@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="static/bootstrap.min.css"/>
+</head>
+<body>
+<div class="container">
+    <form id="empForm">
+        <table border="1px" cellspacing="" cellpadding="" class="container">
+            <input type="button" name="addEmp" class="btn btn-info" value="增加"/>
+            <input type="button" name="deleteEmp" class="btn btn-danger" value="删除"/>
+            员工编号：<input type="text" name="id" />
+            员工名称：<input type="text" name="EmpENAME" />
+            工资区间：<input type="text" name="miniCOMM" />~
+            <input type="text" name="maxCOMM" />
+            <input type="button" name="secahEmp" class="btn btn-info" value="查询"/>
+<!--            <input type="hidden" name="_method" value="get">-->
+            <thead>
+            <tr>
+                <td><input type="checkbox" name="" id="checkAll"/>
+                    <input type="hidden" name="_method" value="DELETE"/>
+                <td>员工id</td>
+                <td>员工姓名</td>
+                <td>工作</td>
+                <td>管理id</td>
+                <td>入职时间</td>
+                <td>SAL</td>
+                <td>COMM</td>
+                <td>部门</td>
+                <td>修改</td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </form>
+</div>
+</body>
+<script src="static/jquery-3.5.1.min.js"></script>
+<script src="static/bootstrap.min.js"></script>
+<script>
+    showEmp();
+    function showEmp(){
+        $.ajax({
+            type:"get",
+            url:"emp",
+            data:$("#empForm").serialize(),
+            async:true,
+            dataType:"json",
+            success:function(data){
+                var obj=data;
+                var str="";
+                for(var i=0;i<obj.length;i++){
+                    str=str+"<tr><td><input type='checkbox' name='checkemp' value='"+obj[i].empno+"'/></td>";
+                    str=str+"<td>"+obj[i].empno+"</td>";
+                    str=str+"<td>"+obj[i].ename+"</td>";
+                    str=str+"<td>"+obj[i].job+"</td>";
+                    str=str+"<td>"+obj[i].mgr+"</td>";
+                    str=str+"<td>"+obj[i].hiredate+"</td>";
+                    str=str+"<td>"+obj[i].sal+"</td>";
+                    str=str+"<td>"+obj[i].comm+"</td>";
+                    str=str+"<td>"+obj[i].deptno+"</td>";
+                    str=str+"<td><input type='button' name='updEmp' class='btn btn-info' value='修改'/></td>";
+                    str=str+"<td><input type='button' name='showEmpInfo' class='btn btn-info' value='信息'/></td></tr>";
+                }
+                $("#empForm tbody").html(str);
+                addEmp();
+                updEmp();
+                showEmpInfo();
+                secahEmp();
+                searchEmp();
+                selectAll();
+                deleteEmp();
+            }
+        });
+    }
+    searchEmp();
+    function searchEmp(){
+        $("input[name=secahEmp]").click(function(){
+            showEmp();
+        });
+
+    }
+
+    function addEmp(){
+        $(":button[name=addEmp]").click(function(){
+            location.href="addEmp.html";
+        });
+    }
+    function updEmp(){
+        $("input[name=updEmp]").click(function(){
+            var id=$(this).parent().parent().find(":checkbox").val();
+            window.localStorage.setItem("id",id);
+            location.href="updEmp.html";
+        });
+    }
+    function showEmpInfo(){
+        $(":button[name=showEmpInfo]").click(function(){
+
+            var id=$(this).parent().parent().find(":checkbox").val();
+
+            $.ajax({
+                type:"get",
+                url:"showEmpInfo",
+                data:{"id":id},
+                async:true,
+                dataType:"json",
+                success:function(data){
+                    if(data>0){
+                        location.href="goShowEmpInfo";
+                    }
+                }
+            });
+
+        });
+    }
+    function secahEmp(){
+        $(":button[name=secahEmp]").click(function(){
+
+        });
+    }
+
+    function selectAll(){
+        $("#checkAll").change(function(){
+            $("input[name=checkemp]").prop("checked",$(this).prop("checked"));
+        });
+    }
+    function deleteEmp(){
+        $("input[name=deleteEmp]").click(function(){
+            var a=[];
+            $("input[name=checkemp]:checked").each(function(){
+                a.push($(this).val());
+            });
+            $.ajax({
+                type:"post",
+                url:"emp",
+                data:{"ids":a.join(","),_method:"DELETE"},
+                async:true,
+                dataType:"json",
+                success:function(data){
+                    if(data){
+                        alert("删除成功");
+                        showEmp();
+                    }
+                    else{
+                        alert("删除失败");
+                    }
+                }
+            });
+        });
+
+    }
+</script>
+</html>
